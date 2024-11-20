@@ -1,34 +1,21 @@
-import { Bind, Controller } from '@nestjs/common';
+import { Bind, Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
 import { Ctx, MessagePattern, Payload } from '@nestjs/microservices';
-
-@Controller()
-export class AppController {
-  constructor(private readonly appService: AppService) {}
-
-  @Bind(Payload(), Ctx())
-  @MessagePattern('v3/hgm-maga@ttn/devices/#')
-  getNotifications(data, context) {
-    console.log(data);
-    console.log(data.uplink_message.decoded_payload.data);
-  }
-}
+import { DeviceService } from './devices/devices.service';
 
 export class Worker {
-  get_device_location = (id) => {
-    // Mock implementation, replace with your real DB query
-    return { service: 'uci', area: 'none', cubicle: 'none', room: '1001' };
-  };
+  constructor(private deviceService: DeviceService) {}
 
-  // Time zone handling
-  colombiaTz = 'America/Bogota';
+  // get_device_location = (id) => {
+  //   // Mock implementation, replace with your real DB query
+  //   return { service: 'uci', area: 'none', cubicle: 'none', room: '1001' };
+  // };
 
-  // Example data structures
   keys = {
     maga_key: {
       sysId: 1,
       deviceId: 0,
-      aplication: 'Maga',
+      application: 'Maga',
       properties: [
         { name: 'Manos limpias', prop: 'clean_hands', value: 0 },
         { name: 'Manos sucias', prop: 'dirty_hands', value: 0 },
@@ -39,17 +26,13 @@ export class Worker {
     vumeter_key: {
       sysId: 2,
       deviceId: 0,
-      aplication: 'vumeter',
+      application: 'vumeter',
       properties: [{ name: 'Decibeles', prop: 'decibels', value: 0 }],
       location: [{ service: '' }, { area: '' }, { cubicle: '' }, { room: '' }],
     },
   };
 
-  // constructor(mongodb) {
-  //   this._mongodb = mongodb; // Store the MongoDB object
-  // }
-
-  _decoder(dataBytes) {
+  _decoder(dataBytes: number[]) {
     const length = dataBytes.length / 2;
     const decodedData = [];
 
@@ -61,85 +44,54 @@ export class Worker {
     return decodedData;
   }
 
-  _raw_data(data) {
+  async processData(data) {
     try {
-      const endDeviceId = data.end_device_ids.device_id;
-      const decoderPayload = data.uplink_message.decoded_payload.data;
-
-      console.log('RAW DATA');
-      console.log(endDeviceId);
-      console.log(decoderPayload);
-
-      return { devId: endDeviceId, payload: decoderPayload };
-    } catch (error) {
-      console.error('Error in raw_data: ', error);
-    }
-  }
-
-  getWeekOfYear(date) {
-    const jan1 = new Date(date.getFullYear(), 0, 1);
-    return Math.ceil(
-      ((date.getTime() - jan1.getTime()) / 86400000 + jan1.getDay() + 1) / 7,
-    );
-  }
-
-  getTimestamp() {
-    const now = new Date();
-    const hour = now.getHours();
-    const day = now.getDate();
-    const weekday = now.getDay();
-    const month = now.getMonth() + 1;
-    const year = now.getFullYear();
-    const week = this.getWeekOfYear(now);
-
-    return { hour, day, week, weekday, month, year };
-  }
-
-  processData(data) {
-    try {
-      const rawData = this._raw_data(data);
-      const { devId: deviceId, payload } = rawData;
-      const sysId = payload[0];
+      const decoderPayload = this._decoder(
+        data.uplink_message.decoded_payload.data,
+      );
+      const applicationName = data.end_device_ids.application_ids.application_id;
+      const deviceId = data.end_device_ids.device_id;
+      const sysId = decoderPayload[0];
+      console.log('sysId', sysId);
+      const payload = decoderPayload.slice(1);
+      console.log('payload', payload);
 
       const output = Object.values(this.keys).find((k) => k.sysId === sysId);
       if (output) {
-        output.deviceId = deviceId;
+        const propertiesData: { [key: string]: number } = {};
         output.properties.forEach((prop, index) => {
-          prop.value = payload[index + 1];
+          propertiesData[prop.prop] = payload[index] || 0;
         });
 
-        const { hour, day, week, weekday, month, year } = this.getTimestamp();
-        const location = this.get_device_location(deviceId);
+        await this.deviceService.createDevice(sysId, deviceId, applicationName, {
+          minute: new Date().getMinutes(),
+          ...propertiesData,
+        });
+
+        return output;
       }
     } catch (error) {
       console.error('Error in processData: ', error);
     }
   }
+}
 
-  saveCurrentDatetime() {
-    const { hour, day, week, weekday, month, year } = this.getTimestamp();
-    const timestamp = { hour, day, week, weekday, month, year };
+@Controller()
+export class AppController {
+  constructor(
+    private readonly appService: AppService,
+    private readonly deviceService: DeviceService,
+  ) {}
+  worker = new Worker(this.deviceService);
 
-    const fs = require('fs');
-    fs.writeFileSync('current_date.json', JSON.stringify(timestamp, null, 2));
+  @Bind(Payload(), Ctx())
+  @MessagePattern('v3/hgm-maga@ttn/devices/#')
+  getDataBytes(data, context) {
+    return this.worker.processData(data);
   }
 
-  updateDB2() {
-    const fs = require('fs');
-    const currentTime = this.getTimestamp();
-
-    if (fs.existsSync('current_date.json')) {
-      const prevTimestamp = JSON.parse(
-        fs.readFileSync('current_date.json', 'utf-8'),
-      );
-      if (currentTime.hour !== prevTimestamp.hour) {
-        this.saveCurrentDatetime();
-      } else {
-        console.log('Same hour, not updating DB');
-      }
-    } else {
-      console.log('No previous timestamp found.');
-      this.saveCurrentDatetime();
-    }
+  @Get()
+  getHello(): string {
+    return this.appService.getHello();
   }
 }
