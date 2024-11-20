@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Device } from './schemas/devices.schema';
@@ -71,7 +75,9 @@ export class DeviceService {
       dataInterval.properties.push(newPropertie._id as Propertie);
       await dataInterval.save();
     } catch (error) {
-      throw new error(error);
+      throw new InternalServerErrorException(
+        `Error al crear el dispositivo: ${error.message}`,
+      );
     }
   }
 
@@ -95,15 +101,28 @@ export class DeviceService {
 
       return device;
     } catch (error) {
-      throw new error(error);
+      throw new InternalServerErrorException(
+        `Error al obtener el dispositivo ${deviceId}: ${error.message}`,
+      );
     }
   }
 
   async getAllDevices() {
-    const devices = await this.deviceModel
-      .find()
-      .populate('data.properties')
-      .exec();
-    return devices;
+    try {
+      const devices = await this.deviceModel
+        .find()
+        .populate('data.properties')
+        .exec();
+
+      if (!devices) {
+        return new NotFoundException(`No se encontraron dispositivos creados`);
+      }
+
+      return devices;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Error obteniendo los dispositivos: ${error.message}`,
+      );
+    }
   }
 }
