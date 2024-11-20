@@ -1,5 +1,6 @@
 import { Controller, Post, Body, Get, Param } from '@nestjs/common';
 import { DeviceService } from './devices.service';
+import { CreateDeviceDto } from './dto/create-device.dto';
 
 @Controller('devices')
 export class DeviceController {
@@ -10,23 +11,15 @@ export class DeviceController {
     return await this.deviceService.getAllDevices();
   }
 
-  @Get(':sysId')
-  async getDeviceData(@Param('sysId') sysId: number) {
-    return await this.deviceService.getDeviceData(sysId);
+  @Get(':deviceId')
+  async getDeviceData(@Param('deviceId') deviceId: string) {
+    return await this.deviceService.getDevice(deviceId);
   }
 
-  // @Post('properties')
-  // async addProperties(@Body() data: { sysId: number; properties: number[] }) {
-  //   const sysId = data.sysId;
-  //   const [cleanHands, dirtyHands, boxChanes] = data.properties;
+  @Post()
+  async createDevice(@Body() device: CreateDeviceDto) {
+    await this.deviceService.createDevice(device);
 
-  //   await this.deviceService.createDevice(sysId, {
-  //     minute: new Date().getMinutes(),
-  //     cleanHands,
-  //     dirtyHands,
-  //     boxChanes,
-  //   });
-
-  //   return { message: 'Properties saved successfully' };
-  // }
+    return `Dispositivo ${device.deviceId} creado exitosamente`;
+  }
 }

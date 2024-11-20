@@ -49,7 +49,8 @@ export class Worker {
       const decoderPayload = this._decoder(
         data.uplink_message.decoded_payload.data,
       );
-      const applicationName = data.end_device_ids.application_ids.application_id;
+      const applicationName =
+        data.end_device_ids.application_ids.application_id;
       const deviceId = data.end_device_ids.device_id;
       const sysId = decoderPayload[0];
       console.log('sysId', sysId);
@@ -63,9 +64,14 @@ export class Worker {
           propertiesData[prop.prop] = payload[index] || 0;
         });
 
-        await this.deviceService.createDevice(sysId, deviceId, applicationName, {
-          minute: new Date().getMinutes(),
-          ...propertiesData,
+        await this.deviceService.createDevice({
+          sysId,
+          deviceId,
+          applicationName,
+          data: {
+            minute: new Date().getMinutes(),
+            ...propertiesData,
+          },
         });
 
         return output;

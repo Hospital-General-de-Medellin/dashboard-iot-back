@@ -1,18 +1,28 @@
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  IsArray,
+  IsOptional,
+  ValidateNested,
+} from 'class-validator';
+import { CreatePropertieDto } from './create-propertie.dto';
+import { Type } from 'class-transformer';
+
 export class CreateDeviceDto {
+  @IsNotEmpty()
+  @IsNumber()
   sysId: number;
+
+  @IsNotEmpty()
+  @IsString()
   deviceId: string;
-  aplication: string;
-  data: [
-    {
-      timestamp: Date;
-      readings: [
-        {
-          minute: number;
-          cleanHands: number;
-          dirtyHands: number;
-          boxChanes: number;
-        },
-      ];
-    },
-  ];
+
+  @IsNotEmpty()
+  @IsString()
+  applicationName: string;
+
+  @ValidateNested()
+  @Type(() => CreatePropertieDto)
+  data: CreatePropertieDto;
 }
