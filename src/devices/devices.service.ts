@@ -81,10 +81,10 @@ export class DeviceService {
     }
   }
 
-  async getDevice(deviceId: string) {
+  async getDevice(id: string) {
     try {
       const device = await this.deviceModel
-        .findOne({ deviceId })
+        .findOne({ id })
         .populate({
           path: 'data',
           populate: {
@@ -94,15 +94,15 @@ export class DeviceService {
         .exec();
 
       if (!device) {
-        return new NotFoundException(
-          `No se encontró el dispositivo ${deviceId}`,
+        throw new NotFoundException(
+          `No se encontró el dispositivo ${id}`,
         );
       }
 
       return device;
     } catch (error) {
       throw new InternalServerErrorException(
-        `Error al obtener el dispositivo ${deviceId}: ${error.message}`,
+        `Error al obtener el dispositivo ${id}: ${error.message}`,
       );
     }
   }
@@ -114,8 +114,8 @@ export class DeviceService {
         .populate('data.properties')
         .exec();
 
-      if (!devices) {
-        return new NotFoundException(`No se encontraron dispositivos creados`);
+      if (!devices || !devices.length) {
+        throw new NotFoundException(`No se encontraron dispositivos creados`);
       }
 
       return devices;

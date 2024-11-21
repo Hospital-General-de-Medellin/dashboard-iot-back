@@ -7,13 +7,13 @@ export class DeviceController {
   constructor(private readonly deviceService: DeviceService) {}
 
   @Get()
-  async getAllDevices() {
-    return await this.deviceService.getAllDevices();
+  getAllDevices() {
+    return this.deviceService.getAllDevices();
   }
 
   @Get(':deviceId')
-  async getDeviceData(@Param('deviceId') deviceId: string) {
-    return await this.deviceService.getDevice(deviceId);
+  getDeviceData(@Param('deviceId') deviceId: string) {
+    return this.deviceService.getDevice(deviceId);
   }
 
   @Post()
