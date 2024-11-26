@@ -8,9 +8,7 @@ export class ProjectsController {
 
   @Post()
   async createProject(@Body() project: CreateProjectDto) {
-    await this.projectsService.createProject(project);
-
-    return 'Proyecto creado exitosamente';
+    return await this.projectsService.createProject(project);
   }
 
   @Get()

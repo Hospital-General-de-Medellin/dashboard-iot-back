@@ -18,8 +18,6 @@ export class DeviceController {
 
   @Post()
   async createDevice(@Body() device: CreateDeviceDto) {
-    await this.deviceService.createDevice(device);
-
-    return `Dispositivo ${device.deviceId} creado exitosamente`;
+    return await this.deviceService.createDevice(device);
   }
 }

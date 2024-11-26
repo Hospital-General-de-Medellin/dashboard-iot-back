@@ -44,11 +44,15 @@ export class ProjectsService {
         devices,
       });
 
-      return newProject.save();
+      await newProject.save();
+
+      return {
+        message: 'Proyecto creado correctamente',
+      };
     } catch (error) {
-      throw new InternalServerErrorException(
-        `Error al crear el proyecto: ${error.message}`,
-      );
+      throw new InternalServerErrorException({
+        message: `Error al crear el proyecto: ${error.message}`,
+      });
     }
   }
 
@@ -65,9 +69,9 @@ export class ProjectsService {
 
       return projects;
     } catch (error) {
-      throw new InternalServerErrorException(
-        `Error obteniendo los proyectos: ${error.message}`,
-      );
+      throw new InternalServerErrorException({
+        message: `Error obteniendo los proyectos: ${error.message}`,
+      });
     }
   }
 
@@ -87,14 +91,14 @@ export class ProjectsService {
         .exec();
 
       if (!project) {
-        throw new NotFoundException(`No se encontró el proyecto: ${id}`);
+        throw new NotFoundException('No se encontró el proyecto');
       }
 
       return project;
     } catch (error) {
-      throw new InternalServerErrorException(
-        `Error al obtener el proyecto ${id}: ${error.message}`,
-      );
+      throw new InternalServerErrorException({
+        message: `Error al obtener el proyecto ${id}: ${error.message}`,
+      });
     }
   }
 }

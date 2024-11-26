@@ -74,10 +74,14 @@ export class DeviceService {
 
       dataInterval.properties.push(newPropertie._id as Propertie);
       await dataInterval.save();
+
+      return {
+        message: 'Dispositivo creado correctamente',
+      };
     } catch (error) {
-      throw new InternalServerErrorException(
-        `Error al crear el dispositivo: ${error.message}`,
-      );
+      throw new InternalServerErrorException({
+        message: `Error al crear el dispositivo: ${error.message}`,
+      });
     }
   }
 
@@ -94,16 +98,14 @@ export class DeviceService {
         .exec();
 
       if (!device) {
-        throw new NotFoundException(
-          `No se encontró el dispositivo ${id}`,
-        );
+        throw new NotFoundException('No se encontró el dispositivo');
       }
 
       return device;
     } catch (error) {
-      throw new InternalServerErrorException(
-        `Error al obtener el dispositivo ${id}: ${error.message}`,
-      );
+      throw new InternalServerErrorException({
+        message: `Error al obtener el dispositivo ${id}: ${error.message}`,
+      });
     }
   }
 
@@ -115,14 +117,14 @@ export class DeviceService {
         .exec();
 
       if (!devices || !devices.length) {
-        throw new NotFoundException(`No se encontraron dispositivos creados`);
+        throw new NotFoundException('No se encontraron dispositivos creados');
       }
 
       return devices;
     } catch (error) {
-      throw new InternalServerErrorException(
-        `Error obteniendo los dispositivos: ${error.message}`,
-      );
+      throw new InternalServerErrorException({
+        message: `Error obteniendo los dispositivos: ${error.message}`,
+      });
     }
   }
 }
