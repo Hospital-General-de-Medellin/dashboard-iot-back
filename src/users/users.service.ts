@@ -36,7 +36,13 @@ export class UsersService {
 
       return user;
     } catch (error) {
-      return error;
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        `Error al obtener el usuario: ${error.message}`,
+      );
     }
   }
 }

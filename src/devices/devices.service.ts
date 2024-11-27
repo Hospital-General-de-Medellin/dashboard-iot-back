@@ -96,9 +96,13 @@ export class DeviceService {
         message: 'Dispositivo creado correctamente',
       };
     } catch (error) {
-      throw new InternalServerErrorException({
-        message: `Error al crear el dispositivo: ${error.message}`,
-      });
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        `Error al crear el dispositivo: ${error.message}`,
+      );
     }
   }
 
@@ -117,7 +121,13 @@ export class DeviceService {
 
       return device;
     } catch (error) {
-      return error;
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        `Error al obtener el dispositivo: ${error.message}`,
+      );
     }
   }
 
@@ -131,7 +141,7 @@ export class DeviceService {
             path: 'properties',
           },
         })
-        .populate('location')
+        .populate('location');
 
       if (!devices || !devices.length) {
         throw new NotFoundException('No se encontraron dispositivos creados');
@@ -139,7 +149,13 @@ export class DeviceService {
 
       return devices;
     } catch (error) {
-      return error;
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        `Error al obtener los dispositivos: ${error.message}`,
+      );
     }
   }
 
@@ -164,9 +180,13 @@ export class DeviceService {
         message: 'Dispositivo actualizado correctamente',
       };
     } catch (error) {
-      throw new InternalServerErrorException({
-        message: `Error al actualizar el dispositivo: ${error.message}`,
-      });
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        `Error al actualizar el dispositivo: ${error.message}`,
+      );
     }
   }
 
@@ -182,9 +202,13 @@ export class DeviceService {
         message: 'Dispositivo eliminado correctamente',
       };
     } catch (error) {
-      throw new InternalServerErrorException({
-        message: `Error al eliminar el dispositivo: ${error.message}`,
-      });
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        `Error al eliminar el dispositivo: ${error.message}`,
+      );
     }
   }
 }

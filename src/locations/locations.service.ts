@@ -21,12 +21,12 @@ export class LocationsService {
       await location.save();
 
       return {
-        message: 'Ubicación creada exitosamente',
+        message: 'Ubicación creada correctamente',
       };
     } catch (error) {
-      throw new InternalServerErrorException({
-        message: `Error al crear la ubicación: ${error.message}`,
-      });
+      throw new InternalServerErrorException(
+        `Error al crear la ubicación: ${error.message}`,
+      );
     }
   }
 
@@ -40,7 +40,13 @@ export class LocationsService {
 
       return locations;
     } catch (error) {
-      return error;
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        `Error al obtener las ubicaciones: ${error.message}`,
+      );
     }
   }
 
@@ -54,7 +60,13 @@ export class LocationsService {
 
       return location;
     } catch (error) {
-      return error;
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        `Error al obtener la ubicación: ${error.message}`,
+      );
     }
   }
 
@@ -75,12 +87,12 @@ export class LocationsService {
       }
 
       return {
-        message: 'Ubicación actualizada exitosamente',
+        message: 'Ubicación actualizada correctamente',
       };
     } catch (error) {
-      throw new InternalServerErrorException({
-        message: `Error al actualizar la ubicación: ${error.message}`,
-      });
+      throw new InternalServerErrorException(
+        `Error al actualizar la ubicación: ${error.message}`,
+      );
     }
   }
 
@@ -93,12 +105,12 @@ export class LocationsService {
       }
 
       return {
-        message: 'Ubicación eliminada exitosamente',
+        message: 'Ubicación eliminada correctamente',
       };
     } catch (error) {
-      throw new InternalServerErrorException({
-        message: `Error al eliminar la ubicación: ${error.message}`,
-      });
+      throw new InternalServerErrorException(
+        `Error al eliminar la ubicación: ${error.message}`,
+      );
     }
   }
 }

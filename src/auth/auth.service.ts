@@ -37,9 +37,13 @@ export class AuthService {
         message: 'Usuario creado correctamente',
       };
     } catch (error) {
-      throw new InternalServerErrorException({
-        message: `Error al crear el usuario: ${error.message}`,
-      });
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        `Error al crear el usuario: ${error.message}`,
+      );
     }
   }
 
@@ -65,9 +69,13 @@ export class AuthService {
         token: token,
       };
     } catch (error) {
-      throw new InternalServerErrorException({
-        message: `Error al iniciar sesion: ${error.message}`,
-      });
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      
+      throw new InternalServerErrorException(
+        `Error al iniciar sesion: ${error.message}`,
+      );
     }
   }
 }

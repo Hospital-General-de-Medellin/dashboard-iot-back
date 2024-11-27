@@ -15,31 +15,31 @@ import { UpdateLocationDto } from './dto/update-location.dto';
 export class LocationsController {
   constructor(private readonly locationsService: LocationsService) {}
 
-  @Post()
-  createLocation(@Body() createLocationDto: CreateLocationDto) {
-    return this.locationsService.createLocation(createLocationDto);
-  }
-
   @Get()
-  findLocations() {
-    return this.locationsService.findLocations();
+  async findLocations() {
+    return await this.locationsService.findLocations();
   }
 
   @Get(':id')
-  findLocation(@Param('id') id: string) {
-    return this.locationsService.findLocation(id);
+  async findLocation(@Param('id') id: string) {
+    return await this.locationsService.findLocation(id);
+  }
+
+  @Post()
+  async createLocation(@Body() createLocationDto: CreateLocationDto) {
+    return await this.locationsService.createLocation(createLocationDto);
   }
 
   @Patch(':id')
-  updateLocation(
+  async updateLocation(
     @Param('id') id: string,
     @Body() updateLocationDto: UpdateLocationDto,
   ) {
-    return this.locationsService.updateLocation(id, updateLocationDto);
+    return await this.locationsService.updateLocation(id, updateLocationDto);
   }
 
   @Delete(':id')
-  deleteLocation(@Param('id') id: string) {
-    return this.locationsService.deleteLocation(id);
+  async deleteLocation(@Param('id') id: string) {
+    return await this.locationsService.deleteLocation(id);
   }
 }

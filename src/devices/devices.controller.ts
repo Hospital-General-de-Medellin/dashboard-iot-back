@@ -16,13 +16,13 @@ export class DeviceController {
   constructor(private readonly deviceService: DeviceService) {}
 
   @Get()
-  findDevices() {
-    return this.deviceService.findDevices();
+  async findDevices() {
+    return await this.deviceService.findDevices();
   }
 
-  @Get(':deviceId')
-  findDevice(@Param('deviceId') deviceId: string) {
-    return this.deviceService.findDevice(deviceId);
+  @Get(':id')
+  async findDevice(@Param('id') id: string) {
+    return await this.deviceService.findDevice(id);
   }
 
   @Post()
@@ -30,16 +30,16 @@ export class DeviceController {
     return await this.deviceService.createDevice(device);
   }
 
-  @Patch(':deviceId')
+  @Patch(':id')
   async updateDevice(
-    @Param('deviceId') deviceId: string,
+    @Param('id') id: string,
     @Body() device: UpdateDeviceDto,
   ) {
-    return await this.deviceService.updateDevice(deviceId, device);
+    return await this.deviceService.updateDevice(id, device);
   }
 
-  @Delete(':deviceId')
-  async deleteDevice(@Param('deviceId') deviceId: string) {
-    return await this.deviceService.deleteDevice(deviceId);
+  @Delete(':id')
+  async deleteDevice(@Param('id') id: string) {
+    return await this.deviceService.deleteDevice(id);
   }
 }

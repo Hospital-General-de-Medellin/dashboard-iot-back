@@ -51,9 +51,13 @@ export class ProjectsService {
         message: 'Proyecto creado correctamente',
       };
     } catch (error) {
-      throw new InternalServerErrorException({
-        message: `Error al crear el proyecto: ${error.message}`,
-      });
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        `Error al crear el proyecto: ${error.message}`,
+      );
     }
   }
 
@@ -67,7 +71,13 @@ export class ProjectsService {
 
       return projects;
     } catch (error) {
-      return error;
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        `Error al obtener los proyectos: ${error.message}`,
+      );
     }
   }
 
@@ -89,7 +99,13 @@ export class ProjectsService {
 
       return project;
     } catch (error) {
-      return error;
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        `Error al obtener el proyecto: ${error.message}`,
+      );
     }
   }
 
@@ -113,9 +129,13 @@ export class ProjectsService {
         message: 'Proyecto actualizado correctamente',
       };
     } catch (error) {
-      throw new InternalServerErrorException({
-        message: `Error al actualizar el proyecto: ${error.message}`,
-      });
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        `Error al actualizar el proyecto: ${error.message}`,
+      );
     }
   }
 
@@ -131,9 +151,13 @@ export class ProjectsService {
         message: 'Proyecto eliminado correctamente',
       };
     } catch (error) {
-      throw new InternalServerErrorException({
-        message: `Error al eliminar el proyecto: ${error.message}`,
-      });
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        `Error al eliminar el proyecto: ${error.message}`,
+      );
     }
   }
 }
