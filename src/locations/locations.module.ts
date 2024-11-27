@@ -9,10 +9,6 @@ import { Device, DeviceSchema } from 'src/devices/schemas/devices.schema';
   imports: [
     MongooseModule.forFeature([
       { name: Location.name, schema: LocationSchema },
-      {
-        name: Device.name,
-        schema: DeviceSchema,
-      },
     ]),
   ],
   controllers: [LocationsController],

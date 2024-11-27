@@ -8,6 +8,7 @@ import { Model } from 'mongoose';
 import { Project } from './schemas/projects.schema';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { Device } from 'src/devices/schemas/devices.schema';
+import { UpdateProjectDto } from './dto/update-project.dto';
 
 @Injectable()
 export class ProjectsService {
@@ -23,9 +24,9 @@ export class ProjectsService {
     devices,
   }: CreateProjectDto) {
     try {
-      const devicesFound = await this.deviceModel
-        .find({ _id: { $in: devices } })
-        .exec();
+      const devicesFound = await this.deviceModel.find({
+        _id: { $in: devices },
+      });
 
       // Validar si el número de dispositivos encontrados es igual al número de IDs proporcionados
       if (devicesFound.length !== devices.length) {
@@ -58,10 +59,7 @@ export class ProjectsService {
 
   async findProjects() {
     try {
-      const projects = await this.projectModel
-        .find()
-        .populate('devices')
-        .exec();
+      const projects = await this.projectModel.find().populate('devices');
 
       if (!projects || !projects.length) {
         throw new NotFoundException(`No se encontraron proyectos creados`);
@@ -75,18 +73,15 @@ export class ProjectsService {
 
   async findProject(id: string) {
     try {
-      const project = await this.projectModel
-        .findById(id)
-        .populate({
-          path: 'devices',
+      const project = await this.projectModel.findById(id).populate({
+        path: 'devices',
+        populate: {
+          path: 'data',
           populate: {
-            path: 'data',
-            populate: {
-              path: 'properties', // Si 'properties' es un subdocumento de 'Data'
-            },
+            path: 'properties', // Si 'properties' es un subdocumento de 'Data'
           },
-        })
-        .exec();
+        },
+      });
 
       if (!project) {
         throw new NotFoundException('No se encontró el proyecto');
@@ -95,6 +90,50 @@ export class ProjectsService {
       return project;
     } catch (error) {
       return error;
+    }
+  }
+
+  async updateProject(
+    id: string,
+    { name, chartType, frequency, devices }: UpdateProjectDto,
+  ) {
+    try {
+      const updatedProject = await this.projectModel.findByIdAndUpdate(id, {
+        name,
+        chartType,
+        frequency,
+        devices,
+      });
+
+      if (!updatedProject) {
+        throw new NotFoundException('Proyecto no encontrado');
+      }
+
+      return {
+        message: 'Proyecto actualizado correctamente',
+      };
+    } catch (error) {
+      throw new InternalServerErrorException({
+        message: `Error al actualizar el proyecto: ${error.message}`,
+      });
+    }
+  }
+
+  async deleteProject(id: string) {
+    try {
+      const deletedProject = await this.projectModel.findByIdAndDelete(id);
+
+      if (!deletedProject) {
+        throw new NotFoundException('Proyecto no encontrado');
+      }
+
+      return {
+        message: 'Proyecto eliminado correctamente',
+      };
+    } catch (error) {
+      throw new InternalServerErrorException({
+        message: `Error al eliminar el proyecto: ${error.message}`,
+      });
     }
   }
 }

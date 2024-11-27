@@ -104,15 +104,12 @@ export class DeviceService {
 
   async findDevice(id: string) {
     try {
-      const device = await this.deviceModel
-        .findById(id)
-        .populate({
-          path: 'data',
-          populate: {
-            path: 'properties',
-          },
-        })
-        .exec();
+      const device = await this.deviceModel.findById(id).populate({
+        path: 'data',
+        populate: {
+          path: 'properties',
+        },
+      });
 
       if (!device) {
         throw new NotFoundException('No se encontró el dispositivo');
@@ -135,7 +132,6 @@ export class DeviceService {
           },
         })
         .populate('location')
-        .exec();
 
       if (!devices || !devices.length) {
         throw new NotFoundException('No se encontraron dispositivos creados');

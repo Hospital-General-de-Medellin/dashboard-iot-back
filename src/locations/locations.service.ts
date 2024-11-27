@@ -6,7 +6,6 @@ import {
 import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Device } from 'src/devices/schemas/devices.schema';
 import { Model } from 'mongoose';
 import { Location } from './schemas/location.schema';
 
@@ -14,7 +13,6 @@ import { Location } from './schemas/location.schema';
 export class LocationsService {
   constructor(
     @InjectModel(Location.name) private readonly LocationModel: Model<Location>,
-    @InjectModel(Device.name) private readonly deviceModel: Model<Device>,
   ) {}
 
   async createLocation({ area, cubicle, room, service }: CreateLocationDto) {
@@ -34,7 +32,7 @@ export class LocationsService {
 
   async findLocations() {
     try {
-      const locations = await this.LocationModel.find().exec();
+      const locations = await this.LocationModel.find();
 
       if (!locations || !locations.length) {
         throw new NotFoundException('No se encontraron ubicaciones creadas');
@@ -48,7 +46,7 @@ export class LocationsService {
 
   async findLocation(id: string) {
     try {
-      const location = await this.LocationModel.findById(id).exec();
+      const location = await this.LocationModel.findById(id);
 
       if (!location) {
         throw new NotFoundException('No se encontró la ubicación');
