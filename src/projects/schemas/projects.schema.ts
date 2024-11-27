@@ -4,7 +4,7 @@ import { Device } from 'src/devices/schemas/devices.schema';
 
 @Schema()
 export class Project extends Document {
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true })
   name: string;
 
   @Prop({ required: true })
