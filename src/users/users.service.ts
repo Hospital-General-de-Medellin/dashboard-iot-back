@@ -30,10 +30,6 @@ export class UsersService {
     try {
       const user = await this.userModel.findOne({ email });
 
-      if (!user) {
-        throw new NotFoundException('No se encontró el usuario');
-      }
-
       return user;
     } catch (error) {
       if (error instanceof NotFoundException) {

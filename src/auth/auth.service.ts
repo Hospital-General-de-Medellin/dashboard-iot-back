@@ -61,7 +61,7 @@ export class AuthService {
         throw new UnauthorizedException('Credenciales invalidas');
       }
 
-      const payload = { sub: user.id, email: user.email };
+      const payload = { sub: user.id, email: user.email, role: user.role };
 
       const token = await this.jwtService.signAsync(payload);
 
