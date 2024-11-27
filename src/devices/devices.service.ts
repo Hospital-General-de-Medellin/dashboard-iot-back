@@ -10,6 +10,7 @@ import { Data } from './schemas/data.schema';
 import { Propertie } from './schemas/properties.schema';
 import { CreateDeviceDto } from './dto/create-device.dto';
 import { Location } from 'src/locations/schemas/location.schema';
+import { UpdateDeviceDto } from './dto/update-device.dto';
 
 @Injectable()
 export class DeviceService {
@@ -43,7 +44,7 @@ export class DeviceService {
           deviceId,
           applicationName, // Aquí deberías definir cómo obtener o asignar el nombre de la aplicación
           data: [], // Inicializar el array de datos vacío,
-          location: locationId,
+          location: null,
         });
 
         // Guardamos el nuevo dispositivo
@@ -143,6 +144,47 @@ export class DeviceService {
       return devices;
     } catch (error) {
       return error;
+    }
+  }
+
+  async updateDevice(
+    id: string,
+    { sysId, deviceId, applicationName, data, locationId }: UpdateDeviceDto,
+  ) {
+    try {
+      const updatedDevice = await this.deviceModel.findByIdAndUpdate(id, {
+        sysId,
+        deviceId,
+        applicationName,
+        data,
+        location: locationId,
+      });
+
+      if (!updatedDevice) {
+        throw new NotFoundException('Dispositivo no encontrado');
+      }
+
+      return {
+        message: 'Dispositivo actualizado correctamente',
+      };
+    } catch (error) {
+      throw new InternalServerErrorException({
+        message: `Error al actualizar el dispositivo: ${error.message}`,
+      });
+    }
+  }
+
+  async deleteDevice(id: string) {
+    try {
+      await this.deviceModel.findByIdAndDelete(id);
+
+      return {
+        message: 'Dispositivo eliminado correctamente',
+      };
+    } catch (error) {
+      throw new InternalServerErrorException({
+        message: `Error al eliminar el dispositivo: ${error.message}`,
+      });
     }
   }
 }

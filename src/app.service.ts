@@ -73,7 +73,7 @@ export class AppService {
           minute: new Date().getMinutes(),
           ...propertiesData,
         },
-        locationId: '',
+        locationId: null,
       });
 
       return output;
