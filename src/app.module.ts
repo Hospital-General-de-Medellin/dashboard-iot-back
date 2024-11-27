@@ -6,6 +6,7 @@ import { DeviceModule } from './devices/devices.module';
 import { ProjectsModule } from './projects/projects.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { LocationsModule } from './locations/locations.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { UsersModule } from './users/users.module';
     ProjectsModule,
     AuthModule,
     UsersModule,
+    LocationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

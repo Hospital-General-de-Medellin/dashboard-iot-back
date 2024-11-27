@@ -2,9 +2,8 @@ import {
   IsNotEmpty,
   IsNumber,
   IsString,
-  IsArray,
-  IsOptional,
   ValidateNested,
+  IsMongoId,
 } from 'class-validator';
 import { CreatePropertieDto } from './create-propertie.dto';
 import { Type } from 'class-transformer';
@@ -24,5 +23,9 @@ export class CreateDeviceDto {
 
   @ValidateNested()
   @Type(() => CreatePropertieDto)
-  data: CreatePropertieDto;
+  data?: CreatePropertieDto;
+
+  @IsNotEmpty()
+  @IsMongoId()
+  locationId: string; // ID de la ubicación asociada (obligatorio)
 }

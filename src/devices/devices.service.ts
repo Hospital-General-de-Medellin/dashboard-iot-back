@@ -9,6 +9,7 @@ import { Device } from './schemas/devices.schema';
 import { Data } from './schemas/data.schema';
 import { Propertie } from './schemas/properties.schema';
 import { CreateDeviceDto } from './dto/create-device.dto';
+import { Location } from 'src/locations/schemas/location.schema';
 
 @Injectable()
 export class DeviceService {
@@ -17,6 +18,7 @@ export class DeviceService {
     @InjectModel(Data.name) private readonly dataModel: Model<Data>,
     @InjectModel(Propertie.name)
     private readonly propertiesModel: Model<Propertie>,
+    @InjectModel(Location.name) private readonly locationModel: Model<Location>,
   ) {}
 
   async createDevice({
@@ -24,6 +26,7 @@ export class DeviceService {
     deviceId,
     applicationName,
     data,
+    locationId,
   }: CreateDeviceDto) {
     try {
       const timestamp = new Date();
@@ -39,10 +42,21 @@ export class DeviceService {
           sysId,
           deviceId,
           applicationName, // Aquí deberías definir cómo obtener o asignar el nombre de la aplicación
-          data: [], // Inicializar el array de datos vacío
+          data: [], // Inicializar el array de datos vacío,
+          location: locationId,
         });
 
         // Guardamos el nuevo dispositivo
+        await device.save();
+      } else if (!device.location && locationId) {
+        const location = await this.locationModel.findById(locationId);
+
+        if (!location) {
+          throw new NotFoundException('No se encontró la ubicación');
+        }
+
+        device.location = location;
+
         await device.save();
       }
 
@@ -64,16 +78,18 @@ export class DeviceService {
       }
 
       // Crear la nueva lectura y agregarla al intervalo
-      const { minute, ...properties } = data; // Separar el minuto del resto de las propiedades
+      if (data) {
+        const { minute, ...properties } = data;
 
-      const newPropertie = new this.propertiesModel({
-        minute, // Asigna el minuto como una propiedad separada
-        properties: new Map(Object.entries(properties)), // Convierte las propiedades restantes a un Map
-      });
-      await newPropertie.save();
+        const newPropertie = new this.propertiesModel({
+          minute, // Asigna el minuto como una propiedad separada
+          properties: new Map(Object.entries(properties)), // Convierte las propiedades restantes a un Map
+        });
+        await newPropertie.save();
 
-      dataInterval.properties.push(newPropertie._id as Propertie);
-      await dataInterval.save();
+        dataInterval.properties.push(newPropertie._id as Propertie);
+        await dataInterval.save();
+      }
 
       return {
         message: 'Dispositivo creado correctamente',
@@ -85,10 +101,10 @@ export class DeviceService {
     }
   }
 
-  async getDevice(id: string) {
+  async findDevice(id: string) {
     try {
       const device = await this.deviceModel
-        .findOne({ id })
+        .findById(id)
         .populate({
           path: 'data',
           populate: {
@@ -103,17 +119,21 @@ export class DeviceService {
 
       return device;
     } catch (error) {
-      throw new InternalServerErrorException({
-        message: `Error al obtener el dispositivo ${id}: ${error.message}`,
-      });
+      return error;
     }
   }
 
-  async getAllDevices() {
+  async findDevices() {
     try {
       const devices = await this.deviceModel
         .find()
-        .populate('data.properties')
+        .populate({
+          path: 'data',
+          populate: {
+            path: 'properties',
+          },
+        })
+        .populate('location')
         .exec();
 
       if (!devices || !devices.length) {
@@ -122,9 +142,7 @@ export class DeviceService {
 
       return devices;
     } catch (error) {
-      throw new InternalServerErrorException({
-        message: `Error obteniendo los dispositivos: ${error.message}`,
-      });
+      return error;
     }
   }
 }
