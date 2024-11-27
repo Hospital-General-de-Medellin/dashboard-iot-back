@@ -176,7 +176,11 @@ export class DeviceService {
 
   async deleteDevice(id: string) {
     try {
-      await this.deviceModel.findByIdAndDelete(id);
+      const deletedDevice = await this.deviceModel.findByIdAndDelete(id);
+
+      if (!deletedDevice) {
+        throw new NotFoundException('Dispositivo no encontrado');
+      }
 
       return {
         message: 'Dispositivo eliminado correctamente',

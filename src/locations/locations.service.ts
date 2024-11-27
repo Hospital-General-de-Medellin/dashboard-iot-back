@@ -59,4 +59,48 @@ export class LocationsService {
       return error;
     }
   }
+
+  async updateLocation(
+    id: string,
+    { area, cubicle, room, service }: UpdateLocationDto,
+  ) {
+    try {
+      const updatedLocation = await this.LocationModel.findByIdAndUpdate(id, {
+        area,
+        cubicle,
+        room,
+        service,
+      });
+
+      if (!updatedLocation) {
+        throw new NotFoundException('Ubicación no encontrada');
+      }
+
+      return {
+        message: 'Ubicación actualizada exitosamente',
+      };
+    } catch (error) {
+      throw new InternalServerErrorException({
+        message: `Error al actualizar la ubicación: ${error.message}`,
+      });
+    }
+  }
+
+  async deleteLocation(id: string) {
+    try {
+      const deletedLocation = await this.LocationModel.findByIdAndDelete(id);
+
+      if (!deletedLocation) {
+        throw new NotFoundException('Ubicación no encontrada');
+      }
+
+      return {
+        message: 'Ubicación eliminada exitosamente',
+      };
+    } catch (error) {
+      throw new InternalServerErrorException({
+        message: `Error al eliminar la ubicación: ${error.message}`,
+      });
+    }
+  }
 }
