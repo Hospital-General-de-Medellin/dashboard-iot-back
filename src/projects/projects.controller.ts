@@ -12,12 +12,12 @@ export class ProjectsController {
   }
 
   @Get()
-  getAllProjects() {
-    return this.projectsService.getProjects();
+  findProjects() {
+    return this.projectsService.findProjects();
   }
 
   @Get(':id')
-  getProject(@Param('id') id: string) {
-    return this.projectsService.getProject(id);
+  findProject(@Param('id') id: string) {
+    return this.projectsService.findProject(id);
   }
 }

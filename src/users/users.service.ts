@@ -1,6 +1,7 @@
 import {
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { Model } from 'mongoose';
@@ -13,7 +14,7 @@ export class UsersService {
     @InjectModel(User.name) private readonly userModel: Model<User>,
   ) {}
 
-  async create({ email, name, password, role }: CreateUserDto) {
+  async createUser({ email, name, password, role }: CreateUserDto) {
     try {
       const user = new this.userModel({ email, name, password, role });
 
@@ -25,15 +26,17 @@ export class UsersService {
     }
   }
 
-  async findOneByEmail(email: string) {
+  async findUserByEmail(email: string) {
     try {
-      const userFound = await this.userModel.findOne({ email }).exec();
+      const user = await this.userModel.findOne({ email }).exec();
 
-      return userFound;
+      if (!user) {
+        throw new NotFoundException('No se encontró el usuario');
+      }
+
+      return user;
     } catch (error) {
-      throw new InternalServerErrorException(
-        `Error al obtener el usuario: ${error.message}`,
-      );
+      return error;
     }
   }
 }

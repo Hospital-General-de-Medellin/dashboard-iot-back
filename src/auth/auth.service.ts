@@ -19,7 +19,7 @@ export class AuthService {
 
   async register({ password, email, name }: RegisterDto) {
     try {
-      const user = await this.usersService.findOneByEmail(email);
+      const user = await this.usersService.findUserByEmail(email);
 
       if (user) {
         throw new BadRequestException('El usuario ya existe');
@@ -27,7 +27,7 @@ export class AuthService {
 
       const hashedPassword = await bcryptjs.hash(password, 10);
 
-      await this.usersService.create({
+      await this.usersService.createUser({
         name,
         email,
         password: hashedPassword,
@@ -45,7 +45,7 @@ export class AuthService {
 
   async login({ email, password }: LoginDto) {
     try {
-      const user = await this.usersService.findOneByEmail(email);
+      const user = await this.usersService.findUserByEmail(email);
 
       if (!user) {
         throw new UnauthorizedException('Credenciales invalidas');

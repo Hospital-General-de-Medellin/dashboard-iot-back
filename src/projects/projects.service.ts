@@ -56,7 +56,7 @@ export class ProjectsService {
     }
   }
 
-  async getProjects() {
+  async findProjects() {
     try {
       const projects = await this.projectModel
         .find()
@@ -69,13 +69,11 @@ export class ProjectsService {
 
       return projects;
     } catch (error) {
-      throw new InternalServerErrorException({
-        message: `Error obteniendo los proyectos: ${error.message}`,
-      });
+      return error;
     }
   }
 
-  async getProject(id: string) {
+  async findProject(id: string) {
     try {
       const project = await this.projectModel
         .findById(id)
@@ -96,9 +94,7 @@ export class ProjectsService {
 
       return project;
     } catch (error) {
-      throw new InternalServerErrorException({
-        message: `Error al obtener el proyecto ${id}: ${error.message}`,
-      });
+      return error;
     }
   }
 }
