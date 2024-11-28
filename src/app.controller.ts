@@ -1,7 +1,7 @@
 import { Bind, Controller } from '@nestjs/common';
-import { AppService } from './app.service';
+import { AppService } from 'src/app.service';
 import { Ctx, MessagePattern, Payload } from '@nestjs/microservices';
-import { Public } from './auth/auth.decorators';
+import { Public } from 'src/common/decorators/auth.decorators';
 
 @Controller()
 export class AppController {

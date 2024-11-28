@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DeviceService } from './devices/devices.service';
+import { DeviceService } from 'src/api/devices/devices.service';
 
 @Injectable()
 export class AppService {

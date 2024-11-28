@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { AppController } from 'src/app.controller';
+import { AppService } from 'src/app.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { DeviceModule } from './devices/devices.module';
-import { ProjectsModule } from './projects/projects.module';
-import { AuthModule } from './auth/auth.module';
-import { UsersModule } from './users/users.module';
-import { LocationsModule } from './locations/locations.module';
+import { DeviceModule } from 'src/api/devices/devices.module';
+import { ProjectsModule } from 'src/api/projects/projects.module';
+import { AuthModule } from 'src/api/auth/auth.module';
+import { UsersModule } from 'src/api/users/users.module';
+import { LocationsModule } from 'src/api/locations/locations.module';
 
 @Module({
   imports: [
