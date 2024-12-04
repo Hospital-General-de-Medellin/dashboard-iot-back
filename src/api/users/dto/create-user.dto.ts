@@ -2,6 +2,7 @@ import {
   IsArray,
   IsEmail,
   IsIn,
+  IsMongoId,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -28,4 +29,9 @@ export class CreateUserDto {
   @IsArray()
   @IsIn(['admin', 'user'], { each: true })
   role?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  projects?: string[];
 }

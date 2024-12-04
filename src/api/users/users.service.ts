@@ -14,11 +14,20 @@ export class UsersService {
     @InjectModel(User.name) private readonly userModel: Model<User>,
   ) {}
 
-  async createUser({ email, name, password, role }: CreateUserDto) {
+  async createUser({ email, name, password, role, projects }: CreateUserDto) {
     try {
-      const user = new this.userModel({ email, name, password, role });
+      const user = new this.userModel({
+        email,
+        name,
+        password,
+        role,
+        projects,
+      });
+      await user.save();
 
-      return await user.save();
+      return {
+        message: 'Usuario creado correctamente',
+      };
     } catch (error) {
       throw new InternalServerErrorException(
         `Error al crear el usuario: ${error.message}`,
