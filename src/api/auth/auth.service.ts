@@ -7,8 +7,8 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/api/users/users.service';
 import { RegisterDto } from 'src/api/auth/dto/register.dto';
-import * as bcryptjs from 'bcryptjs';
 import { LoginDto } from 'src/api/auth/dto/login.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -17,7 +17,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async register({ email, password, name, role }: RegisterDto) {
+  async register({ email, password, name, role, projects }: RegisterDto) {
     try {
       const user = await this.usersService.findUserByEmail(email);
 
@@ -25,13 +25,14 @@ export class AuthService {
         throw new BadRequestException('El usuario ya existe');
       }
 
-      const hashedPassword = await bcryptjs.hash(password, 10);
+      const hashedPassword = await bcrypt.hash(password, 10);
 
       await this.usersService.createUser({
-        name,
         email,
+        name,
         password: hashedPassword,
         role,
+        projects,
       });
 
       return {
@@ -56,7 +57,7 @@ export class AuthService {
         throw new UnauthorizedException('Credenciales invalidas');
       }
 
-      const isPasswordValid = await bcryptjs.compare(password, user.password);
+      const isPasswordValid = await bcrypt.compare(password, user.password);
 
       if (!isPasswordValid) {
         throw new UnauthorizedException('Credenciales invalidas');
@@ -67,7 +68,7 @@ export class AuthService {
       const token = await this.jwtService.signAsync(payload);
 
       return {
-        token: token,
+        accessToken: token,
       };
     } catch (error) {
       if (error instanceof UnauthorizedException) {
