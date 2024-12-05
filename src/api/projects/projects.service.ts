@@ -1,4 +1,6 @@
 import {
+  forwardRef,
+  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -16,7 +18,7 @@ export class ProjectsService {
   constructor(
     @InjectModel(Project.name) private readonly projectModel: Model<Project>,
     @InjectModel(Device.name) private readonly deviceModel: Model<Device>,
-    private readonly UsersService: UsersService,
+    @Inject(forwardRef(() => UsersService)) private readonly usersService: UsersService,
   ) {}
 
   async createProject({ name, chartType, devices }: CreateProjectDto) {
@@ -60,7 +62,7 @@ export class ProjectsService {
   async findProjects(userId?: string) {
     try {
       if (userId) {
-        const user = await this.UsersService.findUser(userId);
+        const user = await this.usersService.findUser(userId);
 
         if (!user) {
           throw new NotFoundException('Usuario no encontrado');
@@ -139,7 +141,6 @@ export class ProjectsService {
         );
       }
 
-      // Combinar dispositivos existentes con los nuevos, evitando duplicados
       const updatedDevices = Array.from(
         new Set([
           ...project.devices.map((device) => device.toString()),
@@ -147,15 +148,14 @@ export class ProjectsService {
         ]),
       );
 
-      const updatedProject = await this.projectModel.findByIdAndUpdate(id, {
-        name,
-        chartType,
-        devices: updatedDevices,
-      });
-
-      if (!updatedProject) {
-        throw new NotFoundException('Proyecto no encontrado');
-      }
+      await this.projectModel.updateOne(
+        { _id: id },
+        {
+          name,
+          chartType,
+          devices: updatedDevices,
+        },
+      );
 
       return {
         message: 'Proyecto actualizado correctamente',
