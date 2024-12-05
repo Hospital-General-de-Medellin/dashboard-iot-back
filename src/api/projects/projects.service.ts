@@ -61,7 +61,7 @@ export class ProjectsService {
   async findProjects(userId?: string) {
     try {
       if (userId) {
-        const user = await this.userModel.findById(userId);
+        const user = await this.userModel.findById(userId).populate('projects');
 
         if (!user) {
           throw new NotFoundException('Usuario no encontrado');

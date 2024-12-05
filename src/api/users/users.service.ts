@@ -97,31 +97,37 @@ export class UsersService {
         throw new NotFoundException('Usuario no encontrado');
       }
 
-      const verifiedProjects = await Promise.all(
-        projects.map(async (projectId) => {
-          const project = await this.projectModel.findById(projectId);
+      if (projects?.length) {
+        const verifiedProjects = await Promise.all(
+          projects?.map(async (projectId) => {
+            const project = await this.projectModel.findById(projectId);
 
-          if (!project) {
-            throw new NotFoundException(
-              `Proyecto con ID ${projectId} no encontrado`,
+            if (!project) {
+              throw new NotFoundException(
+                `Proyecto con ID ${projectId} no encontrado`,
+              );
+            }
+
+            return project._id as Project;
+          }),
+        );
+
+        verifiedProjects?.map((project) => {
+          if (!user.projects.includes(project)) {
+            user.projects.push(project);
+          } else {
+            user.projects = user.projects.filter(
+              (p) => p.toString() !== project.toString(),
             );
           }
+        });
+      }
 
-          return project._id; // Retornar el ID del proyecto validado
-        }),
-      );
+      user.name = name ?? user.name;
+      user.email = email ?? user.email;
+      user.role = role ?? user.role;
 
-      const updatedProjects = Array.from(
-        new Set([
-          ...user.projects.map((project) => project.toString()),
-          ...verifiedProjects,
-        ]),
-      );
-
-      await this.userModel.updateOne(
-        { _id: id },
-        { name, email, projects: updatedProjects, role },
-      );
+      await user.save({ validateModifiedOnly: true });
 
       return {
         message: 'Usuario actualizado correctamente',
