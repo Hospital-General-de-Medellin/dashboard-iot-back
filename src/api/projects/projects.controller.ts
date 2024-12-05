@@ -12,17 +12,24 @@ import { CreateProjectDto } from 'src/api/projects/dto/create-project.dto';
 import { UpdateProjectDto } from 'src/api/projects/dto/update-project.dto';
 import { Roles } from 'src/common/decorators/roles.decorators';
 import { Role } from 'src/enums/role.enum';
+import { User } from 'src/common/decorators/users.decorators';
 
 @Controller('projects')
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
   @Get()
-  async findProjects() {
+  @Roles(Role.Admin, Role.User)
+  async findProjects(@User('sub') userId: string, @User('role') role: Role) {
+    if (role.includes(Role.User)) {
+      return await this.projectsService.findProjects(userId);
+    }
+
     return await this.projectsService.findProjects();
   }
 
   @Get(':id')
+  @Roles(Role.Admin, Role.User)
   async findProject(@Param('id') id: string) {
     return await this.projectsService.findProject(id);
   }

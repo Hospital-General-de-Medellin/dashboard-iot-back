@@ -9,12 +9,14 @@ import { Project } from './schemas/projects.schema';
 import { CreateProjectDto } from 'src/api/projects/dto/create-project.dto';
 import { Device } from 'src/api/devices/schemas/devices.schema';
 import { UpdateProjectDto } from 'src/api/projects/dto/update-project.dto';
+import { UsersService } from 'src/api/users/users.service';
 
 @Injectable()
 export class ProjectsService {
   constructor(
     @InjectModel(Project.name) private readonly projectModel: Model<Project>,
     @InjectModel(Device.name) private readonly deviceModel: Model<Device>,
+    private readonly UsersService: UsersService,
   ) {}
 
   async createProject({
@@ -61,8 +63,18 @@ export class ProjectsService {
     }
   }
 
-  async findProjects() {
+  async findProjects(userId?: string) {
     try {
+      if (userId) {
+        const user = await this.UsersService.findUser(userId);
+
+        if (!user) {
+          throw new NotFoundException('Usuario no encontrado');
+        }
+
+        return user.projects;
+      }
+
       const projects = await this.projectModel.find().populate('devices');
 
       if (!projects || !projects.length) {
@@ -114,11 +126,38 @@ export class ProjectsService {
     { name, chartType, frequency, devices }: UpdateProjectDto,
   ) {
     try {
+      const project = await this.projectModel.findById(id);
+
+      if (!project) {
+        throw new NotFoundException('Proyecto no encontrado');
+      }
+
+      const devicesFound = await this.deviceModel.find({
+        _id: { $in: devices },
+      });
+
+      if (devicesFound.length !== devices.length) {
+        throw new NotFoundException(
+          `Algunos dispositivos no fueron encontrados: ${devices.filter(
+            (id) =>
+              !devicesFound.some((device) => device._id.toString() === id),
+          )}`,
+        );
+      }
+
+      // Combinar dispositivos existentes con los nuevos, evitando duplicados
+      const updatedDevices = Array.from(
+        new Set([
+          ...project.devices.map((device) => device.toString()),
+          ...devices,
+        ]),
+      );
+
       const updatedProject = await this.projectModel.findByIdAndUpdate(id, {
         name,
         chartType,
         frequency,
-        devices,
+        devices: updatedDevices,
       });
 
       if (!updatedProject) {

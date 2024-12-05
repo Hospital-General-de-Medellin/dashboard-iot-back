@@ -23,6 +23,7 @@ export class UsersService {
         role,
         projects,
       });
+      
       await user.save();
 
       return {
@@ -40,6 +41,40 @@ export class UsersService {
       const user = await this.userModel.findOne({ email });
 
       return user;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        `Error al obtener el usuario: ${error.message}`,
+      );
+    }
+  }
+
+  async findUser(id?: string, email?: string) {
+    try {
+      if (id) {
+        const user = await this.userModel.findById(id).populate('projects');
+
+        if (!user) {
+          throw new NotFoundException('Usuario no encontrado');
+        }
+
+        return user;
+      }
+
+      if (email) {
+        const user = await this.userModel.findOne({ email });
+
+        if (!user) {
+          throw new NotFoundException('Usuario no encontrado');
+        }
+
+        return user;
+      }
+
+      return null;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;

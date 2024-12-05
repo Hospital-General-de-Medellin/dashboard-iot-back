@@ -1,6 +1,5 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { UsersService } from 'src/api/users/users.service';
-import { CreateUserDto } from 'src/api/users/dto/create-user.dto';
 import { Roles } from 'src/common/decorators/roles.decorators';
 import { Role } from 'src/enums/role.enum';
 
@@ -8,9 +7,9 @@ import { Role } from 'src/enums/role.enum';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
+  @Get()
   @Roles(Role.Admin)
-  async createUser(@Body() createUserDto: CreateUserDto) {
-    return await this.usersService.createUser(createUserDto);
+  async findUser(@Query('email') email?: string, @Query('id') id?: string) {
+    return await this.usersService.findUser(id, email);
   }
 }
