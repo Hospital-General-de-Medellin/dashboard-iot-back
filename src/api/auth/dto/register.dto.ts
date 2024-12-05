@@ -3,6 +3,7 @@ import {
   IsArray,
   IsEmail,
   IsIn,
+  IsMongoId,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -30,4 +31,9 @@ export class RegisterDto {
   @IsArray()
   @IsIn(['admin', 'user'], { each: true })
   role?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  projects?: string[];
 }
