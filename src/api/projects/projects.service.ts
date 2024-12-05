@@ -19,12 +19,7 @@ export class ProjectsService {
     private readonly UsersService: UsersService,
   ) {}
 
-  async createProject({
-    name,
-    chartType,
-    frequency,
-    devices,
-  }: CreateProjectDto) {
+  async createProject({ name, chartType, devices }: CreateProjectDto) {
     try {
       const devicesFound = await this.deviceModel.find({
         _id: { $in: devices },
@@ -43,7 +38,6 @@ export class ProjectsService {
       const newProject = new this.projectModel({
         name,
         chartType,
-        frequency,
         devices,
       });
 
@@ -123,7 +117,7 @@ export class ProjectsService {
 
   async updateProject(
     id: string,
-    { name, chartType, frequency, devices }: UpdateProjectDto,
+    { name, chartType, devices }: UpdateProjectDto,
   ) {
     try {
       const project = await this.projectModel.findById(id);
@@ -156,7 +150,6 @@ export class ProjectsService {
       const updatedProject = await this.projectModel.findByIdAndUpdate(id, {
         name,
         chartType,
-        frequency,
         devices: updatedDevices,
       });
 

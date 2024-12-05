@@ -20,11 +20,6 @@ export class CreateProjectDto {
   @IsNotEmpty()
   chartType: string;
 
-  @IsNumber()
-  @IsPositive()
-  @IsNotEmpty()
-  frequency: number;
-
   @IsArray()
   @IsMongoId({
     each: true,

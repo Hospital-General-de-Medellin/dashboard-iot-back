@@ -10,9 +10,6 @@ export class Project extends Document {
   @Prop({ required: true })
   chartType: string; // Tipo de gráfica, por ejemplo, "line" o "bar"
 
-  @Prop({ required: true })
-  frequency: number; // Frecuencia en minutos o segundos
-
   @Prop({ type: [Types.ObjectId], ref: 'Device' })
   devices: Device[];
 }
