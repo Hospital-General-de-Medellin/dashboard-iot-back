@@ -7,16 +7,19 @@ import {
   ProjectSchema,
 } from 'src/api/projects/schemas/projects.schema';
 import { Device, DeviceSchema } from 'src/api/devices/schemas/devices.schema';
-import { UsersModule } from '../users/users.module';
+import { User, userSchema } from 'src/api/users/schemas/user.schema';
 
 @Module({
   imports: [
-    UsersModule,
     MongooseModule.forFeature([
       { name: Project.name, schema: ProjectSchema },
       {
         name: Device.name,
         schema: DeviceSchema,
+      },
+      {
+        name: User.name,
+        schema: userSchema,
       },
     ]),
   ],

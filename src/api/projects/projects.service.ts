@@ -10,13 +10,14 @@ import { CreateProjectDto } from 'src/api/projects/dto/create-project.dto';
 import { Device } from 'src/api/devices/schemas/devices.schema';
 import { UpdateProjectDto } from 'src/api/projects/dto/update-project.dto';
 import { UsersService } from 'src/api/users/users.service';
+import { User } from 'src/api/users/schemas/user.schema';
 
 @Injectable()
 export class ProjectsService {
   constructor(
     @InjectModel(Project.name) private readonly projectModel: Model<Project>,
     @InjectModel(Device.name) private readonly deviceModel: Model<Device>,
-    private readonly usersService: UsersService,
+    @InjectModel(User.name) private readonly userModel: Model<User>,
   ) {}
 
   async createProject({ name, chartType, devices }: CreateProjectDto) {
@@ -60,7 +61,7 @@ export class ProjectsService {
   async findProjects(userId?: string) {
     try {
       if (userId) {
-        const user = await this.usersService.findUser(userId);
+        const user = await this.userModel.findById(userId);
 
         if (!user) {
           throw new NotFoundException('Usuario no encontrado');
