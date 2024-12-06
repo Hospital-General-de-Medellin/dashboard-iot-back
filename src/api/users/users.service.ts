@@ -142,4 +142,26 @@ export class UsersService {
       );
     }
   }
+
+  async deleteUser(id: string) {
+    try {
+      const deletedUser = await this.userModel.findByIdAndDelete(id);
+
+      if (!deletedUser) {
+        throw new NotFoundException('Usuario no encontrado');
+      }
+
+      return {
+        message: 'Usuario eliminado correctamente',
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        `Error al eliminar el usuario: ${error.message}`,
+      );
+    }
+  }
 }
