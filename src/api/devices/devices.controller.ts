@@ -6,6 +6,8 @@ import {
   Param,
   Patch,
   Delete,
+  Query,
+  BadRequestException,
 } from '@nestjs/common';
 import { DeviceService } from 'src/api/devices/devices.service';
 import { CreateDeviceDto } from 'src/api/devices/dto/create-device.dto';
@@ -18,8 +20,22 @@ export class DeviceController {
   constructor(private readonly deviceService: DeviceService) {}
 
   @Get()
-  async findDevices() {
-    return await this.deviceService.findDevices();
+  async findDevices(
+    @Query('shift') shift?: 'day' | 'night',
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    if (shift) {
+      return await this.deviceService.filterByShift(shift);
+    }
+
+    if (startDate && endDate) {
+      return await this.deviceService.filterByDateRange(startDate, endDate);
+    }
+
+    if (!startDate && !endDate && !shift) {
+      return await this.deviceService.findDevices();
+    }
   }
 
   @Get(':id')
