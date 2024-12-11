@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -38,16 +39,25 @@ export class DeviceService {
       let device = await this.deviceModel.findOne({ sysId, deviceId });
 
       if (!device) {
-        // Si no se encuentra, creamos un nuevo dispositivo
+        let location = null;
+
+        if (locationId) {
+          location = await this.locationModel.findById(locationId);
+
+          if (!location) {
+            throw new NotFoundException('No se encontró la ubicación');
+          }
+        }
+
+        // Crear y guardar el nuevo dispositivo
         device = new this.deviceModel({
           sysId,
           deviceId,
-          applicationName, // Aquí deberías definir cómo obtener o asignar el nombre de la aplicación
-          data: [], // Inicializar el array de datos vacío,
-          location: null,
+          applicationName,
+          data: [],
+          location,
         });
 
-        // Guardamos el nuevo dispositivo
         await device.save();
       } else if (!device.location && locationId) {
         const location = await this.locationModel.findById(locationId);
@@ -208,6 +218,104 @@ export class DeviceService {
 
       throw new InternalServerErrorException(
         `Error al eliminar el dispositivo: ${error.message}`,
+      );
+    }
+  }
+
+  async filterByShift(shift: 'day' | 'night'): Promise<Device[]> {
+    if (shift !== 'day' && shift !== 'night') {
+      throw new BadRequestException('El turno debe ser "day" o "night"');
+    }
+
+    try {
+      const devices = await this.deviceModel
+        .find()
+        .populate({
+          path: 'data',
+          populate: {
+            path: 'properties',
+          },
+        })
+        .populate('location');
+
+      const filteredDevices = devices.map((device) => {
+        const filteredData = device.data.filter((entry) => {
+          const timestamp = new Date(entry.timestamp);
+          const hour = (timestamp.getUTCHours() + -5 + 24) % 24;
+
+          const isDay = hour >= 6 && hour < 18;
+          const isNight = hour < 6 || hour >= 18;
+
+          if (shift === 'day') {
+            return isDay;
+          } else if (shift === 'night') {
+            return isNight;
+          }
+
+          return false; // Si el turno no es válido
+        });
+
+        if (!filteredData || !filteredData.length) {
+          throw new NotFoundException('No se encontraron datos para el turno');
+        }
+
+        return {
+          ...device.toObject(),
+          data: filteredData,
+        };
+      });
+
+      return filteredDevices as Device[];
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        `Error al aplicar los filtros: ${error.message}`,
+      );
+    }
+  }
+
+  async filterByDateRange(startDate: string, endDate: string) {
+    if (!startDate || !endDate) {
+      throw new BadRequestException(
+        'Debes proporcionar las fechas de inicio y fin',
+      );
+    }
+
+    const dateRegex = /^\d{4}\/\d{2}\/\d{2}$/; // Valida formato YYYY/MM/DD
+
+    if (startDate && !dateRegex.test(startDate)) {
+      throw new BadRequestException('startDate must be in YYYY/MM/DD format');
+    }
+
+    if (endDate && !dateRegex.test(endDate)) {
+      throw new BadRequestException('endDate must be in YYYY/MM/DD format');
+    }
+
+    try {
+      const data = await this.dataModel
+        .find({
+          timestamp: {
+            $gte: startDate,
+            $lt: endDate + ' 23:59:59',
+          },
+        })
+        .exec();
+
+      if (!data || !data.length) {
+        throw new NotFoundException('No se encontraron datos para la fecha');
+      }
+
+      return data;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        `Error al aplicar los filtros: ${error.message}`,
       );
     }
   }
