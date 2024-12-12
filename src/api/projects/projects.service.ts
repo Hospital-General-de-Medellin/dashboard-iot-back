@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Project } from './schemas/projects.schema';
 import { CreateProjectDto } from 'src/api/projects/dto/create-project.dto';
 import { Device } from 'src/api/devices/schemas/devices.schema';
@@ -22,8 +22,10 @@ export class ProjectsService {
 
   async createProject({ name, chartType, devices }: CreateProjectDto) {
     try {
+      const objectIdDevices = devices.map((id) => new Types.ObjectId(id));
+
       const devicesFound = await this.deviceModel.find({
-        _id: { $in: devices },
+        _id: { $in: objectIdDevices },
       });
 
       // Validar si el número de dispositivos encontrados es igual al número de IDs proporcionados
@@ -39,7 +41,7 @@ export class ProjectsService {
       const newProject = new this.projectModel({
         name,
         chartType,
-        devices,
+        devices: objectIdDevices,
       });
 
       await newProject.save();
