@@ -55,7 +55,7 @@ export class UsersService {
     }
   }
 
-  async findUser(id?: string, email?: string) {
+  async findUsers(id?: string, email?: string) {
     try {
       if (id) {
         const user = await this.userModel.findById(id).populate('projects');
@@ -77,7 +77,13 @@ export class UsersService {
         return user;
       }
 
-      return null;
+      const users = await this.userModel.find().populate('projects');
+
+      if (!users || !users.length) {
+        throw new NotFoundException('No se encontraron usuarios');
+      }
+
+      return users;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
