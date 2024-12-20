@@ -75,7 +75,7 @@ export class ProjectsService {
       const projects = await this.projectModel.find().populate('devices');
 
       if (!projects || !projects.length) {
-        throw new NotFoundException(`No se encontraron proyectos creados`);
+        return [];
       }
 
       return projects;

@@ -35,7 +35,7 @@ export class LocationsService {
       const locations = await this.LocationModel.find();
 
       if (!locations || !locations.length) {
-        throw new NotFoundException('No se encontraron ubicaciones creadas');
+        return [];
       }
 
       return locations;

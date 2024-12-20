@@ -154,7 +154,7 @@ export class DeviceService {
         .populate('location');
 
       if (!devices || !devices.length) {
-        throw new NotFoundException('No se encontraron dispositivos creados');
+        return [];
       }
 
       return devices;
@@ -314,6 +314,43 @@ export class DeviceService {
         throw error;
       }
 
+      throw new InternalServerErrorException(
+        `Error al aplicar los filtros: ${error.message}`,
+      );
+    }
+  }
+
+  async filterByPeriodicity(
+    period: 'minute' | 'hour' | 'day' | 'month' | 'year',
+  ) {
+    if (
+      period !== 'minute' &&
+      period !== 'hour' &&
+      period !== 'day' &&
+      period !== 'month' &&
+      period !== 'year'
+    ) {
+      throw new BadRequestException(
+        'El periodo debe ser "minute", "hour", "day", "month" o "year"',
+      );
+    }
+
+    try {
+      if (period === 'year') {
+        const dataByYear = await this.dataModel.find({
+          timestamp: {
+            $gte: new Date(new Date().getFullYear(), 0, 1),
+            $lt: new Date(new Date().getFullYear() + 1, 0, 1),
+          },
+        });
+
+        if (!dataByYear || !dataByYear.length) {
+          throw new NotFoundException('No se encontraron datos para el año');
+        }
+
+        return dataByYear;
+      }
+    } catch (error) {
       throw new InternalServerErrorException(
         `Error al aplicar los filtros: ${error.message}`,
       );

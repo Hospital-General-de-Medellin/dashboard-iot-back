@@ -80,7 +80,7 @@ export class UsersService {
       const users = await this.userModel.find().populate('projects');
 
       if (!users || !users.length) {
-        throw new NotFoundException('No se encontraron usuarios');
+        return [];
       }
 
       return users;
